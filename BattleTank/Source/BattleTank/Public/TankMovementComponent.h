@@ -11,7 +11,7 @@ class UTankTrack;
 /**
  * UTankMovementComponent is responsible for Fly-By-Wire controls
  */
-UCLASS()
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BATTLETANK_API UTankMovementComponent : public UNavMovementComponent
 {
 	GENERATED_BODY()

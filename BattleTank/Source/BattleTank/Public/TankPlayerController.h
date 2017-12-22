@@ -6,8 +6,6 @@
 #include "GameFramework/PlayerController.h"
 #include "TankPlayerController.generated.h" // Must be last include
 
-class ATank;
-
 /**
  * 
  */
@@ -27,10 +25,7 @@ protected:
 	int32 LineTraceRange = 1000000; // KM
 
 	virtual void BeginPlay() override;
-
-	UFUNCTION(BlueprintCallable, Category = "Setup")
-	ATank* GetControlledTank() const;
-
+	
 private:
 	virtual void Tick(float DeltaTime) override;
 	

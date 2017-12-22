@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "../Public/TankAimingComponent.h"
+#include "../Public/Projectile.h"
 #include "../Public/TankBarrel.h"
 #include "../Public/TankTurret.h"
 
@@ -24,7 +25,7 @@ void UTankAimingComponent::Initialize(UTankBarrel * BarrelToSet, UTankTurret * T
 	Turret = TurretToSet;
 }
 
-void UTankAimingComponent::AimAt(FVector HitLocation, float LaunchSpeed)
+void UTankAimingComponent::AimAt(FVector HitLocation)
 {
 	ensure(bWasInitialized && "Did you forget to call Initialize()?");
 	if (!Barrel || !Turret) return;
@@ -66,7 +67,6 @@ bool UTankAimingComponent::MoveBarrelTowards(FVector AimDirection)
 	auto DeltaRotator = AimAsRotator - BarrelRotator;
 
 	Barrel->Elevate(DeltaRotator.Pitch);
-	UE_LOG(LogTemp, Warning, TEXT("%s is pitching barrel by %f"), *GetOwner()->GetName(), DeltaRotator.Pitch);
 	return !FMath::IsNearlyZero(DeltaRotator.Pitch, IsMovingTolerance);
 }
 
@@ -77,7 +77,6 @@ bool UTankAimingComponent::MoveTurretTowards(FVector AimDirection)
 	auto DeltaRotator = AimAsRotator - TurretRotator;
 
 	Turret->Rotate(DeltaRotator.Yaw);
-	UE_LOG(LogTemp, Warning, TEXT("%s is yawing turret by %f"), *GetOwner()->GetName(), DeltaRotator.Yaw);
 	return !FMath::IsNearlyZero(DeltaRotator.Yaw, IsMovingTolerance);
 }
 
@@ -86,7 +85,19 @@ bool UTankAimingComponent::IsReloading()
 	return FiringState == EFiringState::Reloading;
 }
 
-void UTankAimingComponent::BeginReload(float ReloadTimeInSeconds)
+void UTankAimingComponent::Fire()
+{
+	if (!Barrel || IsReloading()) return;
+
+	auto Projectile = GetWorld()->SpawnActor<AProjectile>(
+		ProjectileBlueprint,
+		Barrel->GetSocketLocation(FName("Projectile")),
+		Barrel->GetSocketRotation(FName("Projectile")));
+	Projectile->LaunchProjectile(LaunchSpeed);
+	BeginReload();
+}
+
+void UTankAimingComponent::BeginReload()
 {
 	FiringState = EFiringState::Reloading;
 	GetWorld()->GetTimerManager().SetTimer(MyTimerHandle, this, &UTankAimingComponent::EnterAimingState, 1.0f, true, ReloadTimeInSeconds);
