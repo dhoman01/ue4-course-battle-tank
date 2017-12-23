@@ -49,10 +49,10 @@ void UTankAimingComponent::AimAt(FVector HitLocation)
 	if (bHaveAimSolution)
 	{
 		auto AimDirection = OutLaunchVelocity.GetSafeNormal();
-		auto MovedTurret = MoveTurretTowards(AimDirection);
-		auto MovedBarrel = MoveBarrelTowards(AimDirection);
+		MoveTurretTowards(AimDirection);
+		MoveBarrelTowards(AimDirection);
 		if (!IsReloading())
-			FiringState = (!MovedTurret && !MovedBarrel) ? EFiringState::Locked : EFiringState::Aiming;
+			FiringState = Barrel->GetForwardVector().Equals(AimDirection, 0.01f) ? EFiringState::Locked : EFiringState::Aiming;
 	}
 	else if(!IsReloading())
 	{
